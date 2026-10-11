@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#5878f4">
+  <title>Vibe Scoreboard | 比赛记分</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 5v1"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 3h8v6a4 4 0 0 1-8 0zM8 5H4v2a4 4 0 0 0 4 4m8-6h4v2a4 4 0 0 1-4 4M12 13v5M8 21h8M9 18h6v3"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4M17 3v4M3 11h18M7 15h2M13 15h2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="m15 4 5 5M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="m13 2-9 12h7l-1 8 10-13h-7z"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 8.5a2.5 2.5 0 1 1 4.3 1.8c-1.5 1-1.8 1.2-1.8 2.7M12 17h.01"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m8 10 4 4 4-4"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 10a8 8 0 0 0-14-5L3 8m0-5v5h5M4 14a8 8 0 0 0 14 5l3-3m0 5v-5h-5"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M4 3h13l4 4v14H3V3zM7 3v6h9V3M7 21v-8h10v8"/></symbol>
+  </svg>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a href="#overview" class="brand" aria-label="Vibe Scoreboard 首页"><span class="brand-mark">v.</span><span>vibe<span class="brand-sub">SCOREBOARD</span></span></a>
+      <div class="workspace-badge"><span class="workspace-icon">3</span><div>比赛记分<span>你的本地比赛工作台</span></div></div>
+      <span class="nav-label">工作台</span>
+      <nav class="nav" aria-label="主导航">
+        <a href="#overview" class="nav-item active" data-view="overview"><svg class="icon"><use href="#i-grid"/></svg>总览<span class="nav-dot"></span></a>
+        <a href="#competitions" class="nav-item" data-view="competitions"><svg class="icon"><use href="#i-trophy"/></svg>比赛管理</a>
+        <a href="#history" class="nav-item" data-view="history"><svg class="icon"><use href="#i-list"/></svg>对局记录<span class="nav-count" id="nav-match-count">0</span></a>
+        <a href="#technical" class="nav-item" data-view="technical"><svg class="icon"><use href="#i-bolt"/></svg>技术统计</a>
+        <a href="#players" class="nav-item" data-view="players"><svg class="icon"><use href="#i-users"/></svg>选手管理</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="rule-card"><span class="rule-icon"><svg class="icon"><use href="#i-bolt"/></svg></span><h3>记录每一场比赛.</h3><p>三人点数自动计分.<br>多人基础分快速导入.</p><button class="text-button" id="sidebar-rules">查看记分规则<svg class="icon"><use href="#i-arrow"/></svg></button></div>
+        <button class="backup-button" id="backup-button"><svg class="icon"><use href="#i-save"/></svg>备份数据<svg class="icon"><use href="#i-download"/></svg></button>
+        <div class="local-note"><span class="status-dot"></span>数据保存在本机</div>
+      </div>
+    </aside>
+    <div class="sidebar-scrim" id="sidebar-scrim"></div>
+
+    <div class="main-shell">
+      <header class="topbar">
+        <div class="breadcrumbs"><button class="icon-button mobile-menu" id="menu-button" aria-label="打开导航"><svg class="icon"><use href="#i-menu"/></svg></button><span class="breadcrumb-root">工作台</span><span class="breadcrumb-slash">/</span><strong id="breadcrumb-view">总览</strong></div>
+        <div class="topbar-right"><button class="rate-button" id="rate-settings-button" title="设置新比赛的全局 rate">rate <strong id="global-rate-label">5</strong></button><span class="connection-label" id="connection-label"><span class="status-dot"></span>本地模式</span><span class="topbar-divider"></span><button class="icon-button" id="help-button" aria-label="查看记分规则"><svg class="icon"><use href="#i-help"/></svg></button><span class="user-avatar">V</span></div>
+      </header>
+
+      <main class="content" id="main-content">
+        <div class="demo-banner hidden" id="demo-banner"><span>这是独立的演示数据. 正式记分请使用普通启动模式.</span><span class="demo-badge">DEMO</span></div>
+        <div class="connection-banner hidden" id="connection-banner" role="alert">暂时无法连接服务, 你输入的内容会保留. 请确认 Python 服务仍在运行.<button class="text-button" id="retry-button">重新连接</button></div>
+        <div class="page-heading"><div><div class="eyebrow" id="page-eyebrow">MATCH DAY, EVERY DAY</div><h1 id="page-title">比赛概览<span class="heading-period">.</span></h1><p id="page-subtitle">记录每一场比赛, 让成绩一目了然.</p></div><div class="heading-actions"><button class="button button-secondary" id="import-button"><svg class="icon"><use href="#i-list"/></svg>导入对局</button><button class="button button-secondary" id="export-button"><svg class="icon"><use href="#i-download"/></svg>导出 Excel</button><button class="button button-primary" id="new-match-button"><svg class="icon"><use href="#i-plus"/></svg>记一局</button></div></div>
+        <div class="filter-bar" id="global-filters"><button class="scope-button" id="competition-filter-button"><svg class="icon"><use href="#i-trophy"/></svg><span id="competition-filter-label">全部比赛</span><svg class="icon"><use href="#i-chevron"/></svg></button><div class="date-filter"><svg class="icon"><use href="#i-calendar"/></svg><select id="period-select" aria-label="统计时间范围"><option value="all">全部时间</option><option value="today">今天</option><option value="7">最近 7 天</option><option value="30">最近 30 天</option><option value="custom">自定义日期</option></select></div><div class="custom-dates hidden" id="custom-dates"><input type="date" id="start-date" aria-label="开始日期"><span>至</span><input type="date" id="end-date" aria-label="结束日期"></div><span class="range-summary" id="range-summary">全部时间</span><span class="last-sync" id="last-sync">正在连接...</span></div>
+
+        <section id="competitions-view" class="hidden" aria-label="比赛管理">
+          <div class="players-info"><p id="competitions-summary"></p><button class="text-button" data-action="all-competitions">汇总全部比赛<svg class="icon"><use href="#i-arrow"/></svg></button></div>
+          <div class="competitions-grid" id="competitions-grid"></div>
+          <div class="players-note"><svg class="icon"><use href="#i-help"/></svg>先建立比赛, 再在比赛下添加对局. 旧对局归入历史比赛, 可在对局记录中批量移动到其他比赛.</div>
+        </section>
+
+        <section id="technical-view" class="hidden" aria-label="技术统计">
+          <div class="stats-scope" id="technical-scope"></div>
+          <article class="panel technical-panel"><div class="panel-header"><div><h2>选手技术统计</h2><p>半庄平均得分 = 累计得分 / 半庄回数.</p></div><button class="button button-small button-secondary" id="download-technical"><svg class="icon"><use href="#i-download"/></svg>导出技术统计</button></div><div class="table-wrap"><table class="technical-table"><thead><tr><th>选手</th><th class="number">半庄回数</th><th class="number">半庄平均得分</th><th class="number">累计得分</th></tr></thead><tbody id="technical-body"></tbody></table></div></article>
+          <article class="panel technical-panel"><div class="panel-header"><div><h2>对手查询</h2><p>每条对局记录计一次胜平负. 胜率 = 胜 / (胜 + 平 + 负), 平局计入分母.</p></div><label class="technical-player-label">查询选手<select id="technical-player" aria-label="查询选手"></select></label></div><p class="stats-explanation" id="head-to-head-caption"></p><div class="table-wrap"><table class="technical-table"><thead><tr><th>对手</th><th class="number">同桌局数</th><th class="number">同桌场数</th><th class="number">胜 / 平 / 负</th><th class="number">胜率</th><th class="number">累计分数流向</th></tr></thead><tbody id="opponent-body"></tbody></table></div></article>
+          <div class="stats-note">在顶部选择赛季, 对手查询与导出使用相同的赛季和日期范围. 点数模式只按点数排名, chip 不影响胜负; 基础分模式按当局得分排名, 同分记平局. 分数流向按最终得分的正负比例分配, 以整数记录, 每笔双方收支相抵; 小数采用最大余数法平衡取整, 非零和记录只分配正负双方可匹配的部分. 同桌场数每条成绩记录计 1 场, 同桌局数累加双方录入数量的较小值, 历史成绩数量为 0 时不推算同桌局数. 独立数量汇总只增加半庄回数, 不形成交手记录. 胜平负每条成绩记录计一次, 不乘对战数量.</div>
+        </section>
+
+        <section id="overview-view" aria-label="比赛总览">
+          <div class="metrics-grid" id="metrics-grid">
+            <article class="metric-card"><div class="metric-top"><span>已记录成绩</span><span class="metric-icon blue"><svg class="icon"><use href="#i-list"/></svg></span></div><div class="metric-value" id="metric-matches">0<span>场</span></div><div class="metric-caption" id="metric-match-caption">每场 3 位选手</div></article>
+            <article class="metric-card"><div class="metric-top"><span>参赛选手</span><span class="metric-icon purple"><svg class="icon"><use href="#i-users"/></svg></span></div><div class="metric-value" id="metric-players">0<span>人</span></div><div class="metric-caption" id="metric-player-caption">准备好, 下一场见</div></article>
+            <article class="metric-card leader-metric"><div class="metric-top"><span>当前领跑</span><span class="metric-icon amber"><svg class="icon"><use href="#i-trophy"/></svg></span></div><div class="metric-value leader-name" id="metric-leader">暂无</div><div class="metric-caption" id="metric-leader-caption">等待第一场比赛</div></article>
+            <article class="metric-card"><div class="metric-top"><span>累计额外分</span><span class="metric-icon green"><svg class="icon"><use href="#i-bolt"/></svg></span></div><div class="metric-value" id="metric-extra">0<span>分</span></div><div class="metric-caption">独立于基础分累计</div></article>
+          </div>
+          <div class="overview-grid">
+            <article class="panel leaderboard-panel"><div class="panel-header"><div><h2>累计排行榜</h2><p>按累计总分排名, 同分同名次</p></div><span class="small-tag" id="leaderboard-period">全部比赛</span></div><div class="table-wrap"><table class="leaderboard-table"><thead><tr><th class="rank-th">排名</th><th>选手</th><th class="number">场次</th><th class="number">基础分</th><th class="number">额外分</th><th class="number">累计总分</th></tr></thead><tbody id="leaderboard-body"></tbody></table></div><div class="panel-foot"><span><span class="mini-dot"></span>总分 = 基础分 + 额外分</span><button class="text-button" data-go="players">管理选手<svg class="icon"><use href="#i-arrow"/></svg></button></div></article>
+            <article class="panel trend-panel"><div class="panel-header"><div><h2>得分走势</h2><p id="chart-description">按个人录分顺序累计, 各人画到自己的最后一场</p></div><div class="chart-actions"><label class="chart-mode-label" for="chart-mode">绘图方式<select id="chart-mode"><option value="personal">个人录分顺序</option><option value="global">全局场次</option></select></label><button class="button button-small button-secondary" type="button" id="chart-export-button" title="导出 1920 x 1080 PNG" disabled><svg class="icon"><use href="#i-download"/></svg>导出图片</button><button class="button button-small button-secondary" type="button" id="chart-select-button"><svg class="icon"><use href="#i-users"/></svg>选择选手</button></div></div><div id="chart-container" class="chart-container"></div><div class="chart-legend" id="chart-legend"></div><div class="trend-foot" id="trend-foot">横轴为个人录分记录数, 曲线停在各自最后一场</div></article>
+          </div>
+          <article class="panel recent-panel"><div class="panel-header"><div><h2>最近对局<span class="header-count" id="recent-count">0</span></h2><p>每一场记录, 都已同步到排行榜</p></div><button class="text-button" data-go="history">全部记录<svg class="icon"><use href="#i-arrow"/></svg></button></div><div class="table-wrap" id="recent-container"></div></article>
+          <footer class="page-footer"><span>VIBE SCOREBOARD</span><span>好的比赛, 值得被记录.</span><span><svg class="icon"><use href="#i-lock"/></svg>本地保存</span></footer>
+        </section>
+
+        <section id="history-view" class="hidden" aria-label="比赛记录">
+          <article class="panel history-panel"><div class="history-toolbar"><div><h2>所有对局<span class="header-count" id="history-count">0</span></h2><p>编辑或删除后, 累计统计会立即更新.</p></div><label class="search-box"><svg class="icon"><use href="#i-search"/></svg><input id="history-search" type="search" placeholder="搜索选手、备注或场次" aria-label="搜索比赛"></label></div><div class="bulk-toolbar"><span id="match-selection-count">已选 0 场</span><div class="bulk-links"><button class="text-button" id="select-all-matches">全选筛选结果</button><button class="text-button" id="clear-match-selection">清空</button></div><button class="button button-small button-secondary" id="bulk-move-matches" disabled>移动到比赛</button><button class="button button-small button-danger" id="bulk-delete-matches" disabled><svg class="icon"><use href="#i-trash"/></svg>删除所选对局</button></div><div class="table-wrap" id="history-container"></div><div class="pagination"><span id="pagination-info"></span><div><button class="button button-small button-secondary" id="prev-page">上一页</button><button class="button button-small button-secondary" id="next-page">下一页</button></div></div></article>
+        </section>
+
+        <section id="players-view" class="hidden" aria-label="选手管理"><div class="players-info"><p id="players-summary"></p><label class="show-archived"><input type="checkbox" id="show-archived">显示已停用选手</label></div><div class="bulk-toolbar player-bulk-toolbar"><span id="player-selection-count">已选 0 人</span><div class="bulk-links"><button class="text-button" id="select-all-players">全选当前选手</button><button class="text-button" id="clear-player-selection">清空</button></div><button class="button button-small button-danger" id="bulk-delete-players" disabled><svg class="icon"><use href="#i-trash"/></svg>删除选手及关联对局</button></div><div class="players-grid" id="players-grid"></div><div class="players-note"><svg class="icon"><use href="#i-help"/></svg>停用保留历史记录, 批量删除会移除选手及其参与的整场对局.</div></section>
+        <div class="loading-overlay" id="loading"><div class="spinner"></div><p>正在读取比赛数据...</p></div>
+      </main>
+    </div>
+  </div>
+
+  <dialog class="match-dialog" id="match-dialog" aria-labelledby="match-dialog-title"><form id="match-form" novalidate>
+    <div class="dialog-header"><div><span class="eyebrow">THREE PLAYERS, ONE MATCH</span><h2 id="match-dialog-title">记一局</h2><p>输入点数和 chip, 自动计算本局分数.</p></div><button type="button" class="icon-button" data-close="match-dialog" aria-label="关闭录分窗口"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <label class="player-name-label match-competition-label">所属比赛<select id="match-competition" required></select></label>
+    <div class="match-meta"><label>对局时间<input type="datetime-local" id="match-date" required></label><label>备注 <span class="optional">选填</span><input id="match-note" maxlength="200" placeholder="例如: 周末友谊赛"></label></div>
+    <div class="scoring-options"><label>计分方式<select id="scoring-mode"><option value="points">输入点数自动计算</option><option value="manual">手动输入基础分</option><option value="multi">多人录分 (仅基础分和 rate)</option></select></label><label>本局 rate<input type="text" inputmode="decimal" id="match-rate" autocomplete="off" value="1"></label><span>本局总分 = (基础分 + 额外分) × rate</span></div>
+    <div class="participant-grid" id="participant-grid"></div>
+    <div class="autofill-row"><span id="scoring-hint">点数、chip 必须为整数, chip 合计为 0. 不检查点数总和.</span><button class="text-button hidden" type="button" id="knockout-button"><svg class="icon"><use href="#i-bolt"/></svg>选择击飞赏归属</button><button class="text-button hidden" type="button" id="autofill-button"><svg class="icon"><use href="#i-bolt"/></svg>补齐第 3 人基础分</button></div>
+    <p class="knockout-summary hidden" id="knockout-summary"></p>
+    <div class="balance-box" id="balance-box" role="status" aria-live="polite"><span class="balance-icon"><svg class="icon"><use href="#i-help"/></svg></span><div><strong id="balance-title">输入三人的基础分</strong><span id="balance-description">基础分之和须为 0, 额外分不参与校验.</span></div><span class="balance-value" id="balance-value">-</span></div>
+    <p class="form-error hidden" id="match-error" role="alert"></p>
+    <div class="dialog-footer"><span><svg class="icon"><use href="#i-lock"/></svg>保存后自动同步统计</span><div><button class="button button-secondary" type="button" data-close="match-dialog">取消</button><button class="button button-primary" type="submit" id="save-match"><svg class="icon"><use href="#i-check"/></svg>保存对局</button></div></div>
+  </form></dialog>
+
+  <dialog class="small-dialog" id="knockout-dialog" aria-labelledby="knockout-title"><form id="knockout-form"><div class="dialog-header"><div><span class="eyebrow">KNOCKOUT BONUS</span><h2 id="knockout-title">击飞赏归属</h2><p id="knockout-description"></p></div><button class="icon-button" type="button" data-close="knockout-dialog" aria-label="关闭击飞赏窗口"><svg class="icon"><use href="#i-close"/></svg></button></div><label class="player-name-label">获得 10 分的本局玩家<select id="knockout-recipient" required></select></label><p class="input-hint">0 点玩家扣除 10 分, 赏分转给你选择的另一位玩家. 多位玩家为 0 点时, 分别设置归属.</p><div class="dialog-footer"><div></div><div><button class="button button-secondary" type="button" data-close="knockout-dialog">取消</button><button class="button button-primary" type="submit">确认归属</button></div></div></form></dialog>
+
+  <dialog class="small-dialog" id="rate-dialog" aria-labelledby="rate-title"><form id="rate-form"><div class="dialog-header"><div><span class="eyebrow">GLOBAL RATE</span><h2 id="rate-title">设置全局 rate</h2></div><button class="icon-button" type="button" data-close="rate-dialog" aria-label="关闭 rate 设置"><svg class="icon"><use href="#i-close"/></svg></button></div><label class="player-name-label">新比赛使用的倍率<input type="text" inputmode="decimal" id="global-rate-input" autocomplete="off" required></label><p class="input-hint">大于 0, 最多两位小数. 保存后用于新比赛, 历史比赛保留各自的 rate. 可在录分窗口单独修改本局 rate.</p><p class="form-error hidden" id="rate-error" role="alert"></p><div class="dialog-footer"><div></div><div><button class="button button-secondary" type="button" data-close="rate-dialog">取消</button><button class="button button-primary" type="submit" id="save-rate">保存 rate</button></div></div></form></dialog>
+
+  <dialog class="small-dialog" id="player-dialog" aria-labelledby="player-dialog-title"><form id="player-form"><div class="dialog-header"><div><span class="eyebrow">YOUR PLAYERS</span><h2 id="player-dialog-title">添加选手</h2></div><button type="button" class="icon-button" data-close="player-dialog" aria-label="关闭选手窗口"><svg class="icon"><use href="#i-close"/></svg></button></div><label class="player-name-label">选手姓名<input id="player-name" maxlength="24" required placeholder="输入姓名或昵称" autocomplete="off"></label><p class="input-hint">最多 24 个字符, 姓名不可重复. 改名会同步到历史记录.</p><p class="form-error hidden" id="player-error" role="alert"></p><div class="dialog-footer"><div></div><div><button class="button button-secondary" type="button" data-close="player-dialog">取消</button><button class="button button-primary" id="save-player" type="submit">保存选手</button></div></div></form></dialog>
+
+  <dialog class="small-dialog" id="confirm-dialog" aria-labelledby="confirm-title"><div class="dialog-header"><h2 id="confirm-title"></h2><button class="icon-button" data-close="confirm-dialog" aria-label="关闭确认窗口"><svg class="icon"><use href="#i-close"/></svg></button></div><p class="confirm-message" id="confirm-message"></p><p class="form-error hidden" id="confirm-error" role="alert"></p><div class="dialog-footer"><div></div><div><button class="button button-secondary" data-close="confirm-dialog">取消</button><button class="button button-danger" id="confirm-action">确认</button></div></div></dialog>
+
+  <dialog class="small-dialog rules-dialog" id="rules-dialog" aria-labelledby="rules-title"><div class="dialog-header"><div><span class="eyebrow">THE SCORING RULES</span><h2 id="rules-title">记分规则</h2></div><button class="icon-button" data-close="rules-dialog" aria-label="关闭规则窗口"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="rule-details"><div><span>01</span><p><strong>三人, 整数点数</strong>选择三位不同选手, 输入整数点数. 不检查点数合计是否为 1050. 名次只按点数确定, 同点数同名次, chip 不影响名次.</p></div><div><span>02</span><p><strong>按名次计算</strong>第三名: (点数 - 500) / 10. 第二名: 点数小于 400 时减 500, 否则减 400, 再除以 10. 第一名: 另外两人名次分之和的相反数. 第一、二名同点数时平分第三名输掉的名次分; 第二、三名同点数沿用原公式, 选择计分先后.</p></div><div><span>03</span><p><strong>chip 与击飞赏</strong>chip 必须是整数且三人合计为 0, 1 chip = 3 分. 每位 0 点玩家扣 10 分, 在击飞赏弹窗中选择本局另一位玩家获得这 10 分. 两项均加入基础分.</p></div><div><span>04</span><p><strong>全局 rate</strong>本局总分 = (基础分 + 额外分) × rate. 默认 rate 为 1, 可从页面右上角修改. 历史比赛保存当时的 rate. 额外分和 rate 最多两位小数, 最终结果精确保留至四位小数.</p></div><div><span>05</span><p><strong>旧数据与导出</strong>旧记录保留原分数, rate 为 1, 可用手动模式编辑. 排行榜、走势和导出都使用乘 rate 后的实际分数. 导出仍按每位选手自己的参赛顺序列出逐场分数.</p></div><div><span>06</span><p><strong>多人录分</strong>超过三人时也可录入一局成绩. 每人仅填基础分, 所有人的基础分合计必须为 0. 本局总分 = 基础分 × rate, 保存后计入对应比赛.</p></div></div><div class="dialog-footer"><span>快捷键 N: 新建对局</span><button class="button button-primary" data-close="rules-dialog">知道了</button></div></dialog>
+
+  <dialog class="small-dialog" id="chart-selection-dialog" aria-labelledby="chart-selection-title"><form id="chart-selection-form">
+    <div class="dialog-header"><div><span class="eyebrow">CHOOSE YOUR PLAYERS</span><h2 id="chart-selection-title">选择走势图选手</h2><p>选择一位或多位选手, 按当前绘图方式展示累计得分.</p></div><button class="icon-button" type="button" data-close="chart-selection-dialog" aria-label="关闭走势图选手选择"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <section class="export-ranking" aria-label="走势图选手">
+      <div class="export-ranking-heading"><strong>选择选手</strong><div><button class="text-button" type="button" id="chart-select-all">全选</button><button class="text-button" type="button" id="chart-clear-selection">清空</button></div></div>
+      <div class="export-ranking-list" id="chart-player-list"></div>
+      <div class="export-ranking-foot"><span id="chart-player-count"></span><span>至少选择一位选手.</span></div>
+    </section>
+    <div class="dialog-footer"><div></div><div><button class="button button-secondary" type="button" data-close="chart-selection-dialog">取消</button><button class="button button-primary" type="submit" id="generate-chart">生成折线图</button></div></div>
+  </form></dialog>
+
+  <dialog class="small-dialog" id="export-dialog" aria-labelledby="export-title"><div class="dialog-header"><div><span class="eyebrow">TAKE YOUR SCORES WITH YOU</span><h2 id="export-title">导出比赛数据</h2></div><button class="icon-button" data-close="export-dialog" aria-label="关闭导出窗口"><svg class="icon"><use href="#i-close"/></svg></button></div><p class="export-description" id="export-description"></p>
+    <section class="export-ranking" aria-label="参与排名的选手">
+      <div class="export-ranking-heading"><strong>参与排名的选手</strong><div><button class="text-button" type="button" id="ranking-select-all">全选</button><button class="text-button" type="button" id="ranking-select-none">全不选</button></div></div>
+      <div class="export-ranking-list" id="export-ranking-list"></div>
+      <div class="export-ranking-foot"><span>未勾选者保留成绩, 排名显示 -.</span><span id="export-ranking-summary"></span></div>
+    </section>
+    <div class="export-options"><button class="export-option" id="download-excel"><span class="file-icon excel-icon">X</span><span><strong>Excel 比赛统计 + 对局明细</strong><small>保留横向排名表, 附明细用于批量导入</small></span><svg class="icon"><use href="#i-download"/></svg></button><button class="export-option" id="download-csv"><span class="file-icon csv-icon">C</span><span><strong>CSV 比赛统计</strong><small>与 Excel 使用相同的逐场分数表头</small></span><svg class="icon"><use href="#i-download"/></svg></button><button class="export-option" id="download-details"><span class="file-icon csv-icon">D</span><span><strong>CSV 对局明细</strong><small>每人一行, 保留比赛归属和原始输入, 可导入</small></span><svg class="icon"><use href="#i-download"/></svg></button></div><div class="export-note">排名表头: 排名 / 选手 / 第1场基础分 / 第1场额外分 / 第2场基础分 / 第2场额外分 / ... / 总分.<br>导出按所选比赛和日期筛选, 每位选手按自己的参赛顺序连续排列. 明细包含所选范围的完整对局, 不受排名选手勾选影响.</div><p class="form-error hidden" id="export-error" role="alert"></p></dialog>
+
+  <dialog class="multi-dialog" id="multi-dialog" aria-labelledby="multi-title"><form id="multi-form" novalidate>
+    <div class="dialog-header"><div><span class="eyebrow">ONE ROUND, ALL YOUR PLAYERS</span><h2 id="multi-title">多人录分</h2><p>每位选手只填基础分, 本局总分 = 基础分 × rate.</p></div><button type="button" class="icon-button" data-close="multi-dialog" aria-label="关闭多人录分"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <label class="player-name-label match-competition-label">所属比赛<select id="multi-competition" required></select></label>
+    <div class="match-meta"><label>对局时间<input type="datetime-local" id="multi-date" required></label><label>备注 <span class="optional">选填</span><input id="multi-note" maxlength="200" placeholder="例如: 导入比赛成绩"></label></div>
+    <div class="multi-rate-row"><label>记录类型<select id="multi-kind"><option value="score">成绩与对战数量</option><option value="counts">仅汇总历史对战数量</option></select></label><label>本局 rate<input id="multi-rate" type="text" inputmode="decimal" autocomplete="off" value="1"></label><span>基础分合计须为 0. 对战数量默认 1, 已单独汇总的历史成绩填 0. 仅登记数量时基础分填 0.</span></div>
+    <div class="multi-controls"><strong>选手成绩</strong><div><button id="multi-add" type="button" class="text-button"><svg class="icon"><use href="#i-plus"/></svg>添加选手</button><button id="multi-add-all" type="button" class="text-button">添加全部选手</button></div></div>
+    <div class="multi-table-wrap table-wrap"><table class="multi-table"><thead><tr><th>#</th><th>选手</th><th>基础分</th><th>对战数量</th><th class="number">本局总分</th><th></th></tr></thead><tbody id="multi-body"></tbody></table></div>
+    <p id="multi-summary" class="multi-summary" role="status" aria-live="polite"></p>
+    <details class="multi-import-tools"><summary>从 Excel / CSV 批量读入</summary><p>表格必须包含"选手"和"基础分"两列, 可增加"对战数量"列, 不填时默认 1, 基础分合计必须为 0. 读取 Excel 的第一张工作表. 读入后会替换上方草稿, 点击保存后才计入比赛.</p><label class="upload-field">上传成绩表<input id="multi-file" type="file" accept=".xlsx,.csv"><span>最大 5 MB, 一局最多 200 位选手. 新姓名会在保存时自动建立.</span></label><button id="multi-read-file" type="button" class="button button-small button-secondary">读入表格</button><label class="multi-paste-label">或粘贴 Excel 成绩数据<textarea id="multi-paste" rows="4" placeholder="选手    基础分&#10;选手 A    35&#10;选手 B    -35"></textarea></label><button id="multi-read-paste" type="button" class="button button-small button-secondary">读入粘贴数据</button></details>
+    <p class="form-error hidden" id="multi-error" role="alert"></p>
+    <div class="dialog-footer"><span>保存后计入对应比赛的统计</span><div><button type="button" class="button button-secondary" data-close="multi-dialog">取消</button><button id="save-multi" type="submit" class="button button-primary">保存对局</button></div></div>
+  </form></dialog>
+
+  <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+  <dialog class="small-dialog" id="competition-dialog" aria-labelledby="competition-title"><form id="competition-form"><div class="dialog-header"><div><span class="eyebrow">YOUR COMPETITIONS</span><h2 id="competition-title">建立比赛</h2><p>每场比赛可以包含多局, 独立统计或合并汇总.</p></div><button type="button" class="icon-button" data-close="competition-dialog" aria-label="关闭比赛编辑"><svg class="icon"><use href="#i-close"/></svg></button></div><label class="player-name-label">比赛名称<input id="competition-name" maxlength="60" required placeholder="例如: 秋季联赛"></label><label class="player-name-label competition-note-label">比赛备注 <span class="optional">选填</span><input id="competition-note" maxlength="200" placeholder="时间、地点或赛制"></label><p class="form-error hidden" id="competition-error" role="alert"></p><div class="dialog-footer"><div></div><div><button type="button" class="button button-secondary" data-close="competition-dialog">取消</button><button type="submit" class="button button-primary" id="save-competition">保存对局</button></div></div></form></dialog>
+  <dialog class="small-dialog" id="competition-selection-dialog" aria-labelledby="competition-selection-title"><form id="competition-selection-form"><div class="dialog-header"><div><span class="eyebrow">CHOOSE YOUR COMPETITIONS</span><h2 id="competition-selection-title">选择统计比赛</h2><p>可批量选择. 排行榜、走势图、技术统计和导出使用同一范围.</p></div><button class="icon-button" type="button" data-close="competition-selection-dialog" aria-label="关闭比赛选择"><svg class="icon"><use href="#i-close"/></svg></button></div><section class="export-ranking"><div class="export-ranking-heading"><strong>比赛列表</strong><div><button type="button" class="text-button" id="competition-select-all">全选</button><button type="button" class="text-button" id="competition-select-none">清空</button></div></div><div class="competition-choices" id="competition-choice-list"></div><div class="export-ranking-foot"><span id="competition-choice-count"></span><span>至少选择一场比赛.</span></div></section><div class="dialog-footer"><div></div><div><button type="button" class="button button-secondary" data-close="competition-selection-dialog">取消</button><button type="submit" class="button button-primary" id="apply-competitions">应用范围</button></div></div></form></dialog>
+  <dialog class="small-dialog" id="move-dialog" aria-labelledby="move-title"><form id="move-form"><div class="dialog-header"><div><h2 id="move-title">移动所选对局</h2><p id="move-description"></p></div><button type="button" class="icon-button" data-close="move-dialog" aria-label="关闭移动窗口"><svg class="icon"><use href="#i-close"/></svg></button></div><label class="player-name-label">目标比赛<select id="move-competition" required></select></label><p class="input-hint">只修改比赛归属, 原有分数和时间保留.</p><p class="form-error hidden" id="move-error" role="alert"></p><div class="dialog-footer"><div></div><div><button type="button" class="button button-secondary" data-close="move-dialog">取消</button><button type="submit" class="button button-primary" id="save-move">移动对局</button></div></div></form></dialog>
+  <dialog class="import-dialog" id="import-dialog" aria-labelledby="import-title"><form id="import-form"><div class="dialog-header"><div><span class="eyebrow">BRING YOUR ROUNDS BACK</span><h2 id="import-title">批量导入对局</h2><p>上传新版导出 Excel 或对局明细 CSV, 预览后一次性导入.</p></div><button type="button" class="icon-button" data-close="import-dialog" aria-label="关闭导入窗口"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="import-fields"><label class="upload-field">选择表格<input id="import-file" type="file" accept=".xlsx,.csv" required><span>支持 XLSX / CSV, 最大 5 MB, 最多 10,000 局.</span></label><div class="import-selects"><label>导入到比赛<select id="import-competition"><option value="">按表中的比赛归属</option></select></label><label>遇到重复对局<select id="import-mode"><option value="skip">跳过重复 (默认)</option><option value="overwrite">覆盖已有对局</option><option value="copy">作为新的对局导入</option></select></label></div><button class="text-button" type="button" id="download-template"><svg class="icon"><use href="#i-download"/></svg>下载导入模板 (含一局示例)</button><p class="stats-note">Excel 中读取"对局明细"工作表. 三人模式每局三行; 多人模式每位选手一行, 座位从 1 连续编号. 点数模式按点数、chip、击飞赏、原始额外分和 rate 重新计算; 手动模式使用原始基础分与额外分; 多人模式仅使用基础分与 rate, 基础分合计必须为 0. 横向排名表无法还原同桌组合, 请使用新版明细.</p></div><p class="form-error hidden" id="import-error" role="alert"></p><div class="import-preview hidden" id="import-preview"></div><div class="dialog-footer"><span>新选手和新比赛自动建立</span><div><button type="submit" class="button button-secondary" id="preview-import">检查并预览</button><button type="button" class="button button-primary" id="commit-import" disabled>确认导入</button></div></div></form></dialog>
+  <noscript><div class="noscript">请启用浏览器 JavaScript 后使用记分工具.</div></noscript>
+</body>
+</html>
