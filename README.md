@@ -26,7 +26,7 @@ Data is stored locally. Use the built-in backup feature regularly, and preserve 
 
 ## Documentation and Feedback
 
-For detailed instructions and scoring rules, see the [Chinese user guide](vibe-scoreboard/README.md).
+For detailed instructions and scoring rules, see the [User guide](vibe-scoreboard/README.md).
 
 Bug reports and feature suggestions are welcome through GitHub Issues. Please include steps to reproduce the problem, your operating system, and relevant screenshots.
 
