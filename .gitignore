@@ -1,0 +1,31 @@
+# Runtime data and credentials
+**/data/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+*.db
+entry-access.json
+ngrok.yml
+connection-info.txt
+remote-access-settings.json
+remote-access-state.json
+server-state.json
+pending.json
+settings.json
+
+# Local deployment and generated files
+/backups/
+/logs/
+/checks/
+/tools/
+/work/
+/.github-publish/
+/.work-*/
+/releases/*-validation/
+/releases/Blue3-ScoreEntry-Windows/
+__pycache__/
+*.py[cod]
+*.log
+node_modules/
+.DS_Store
+Thumbs.db

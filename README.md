@@ -14,13 +14,13 @@ Shared score entry is now available through a Windows client and a server runnin
 
 1. On the host computer, open `vibe-scoreboard` and run `start-server.bat`, or run `python server.py` with Python 3.10 or later.
 2. Use the host's management page at `http://127.0.0.1:8765` to manage seasons, players, and records. The shared score-entry service uses port `8766`. Do not run `start.bat` and `start-server.bat` at the same time with the default ports.
-3. On a participant's Windows 10/11 64-bit computer, extract `Blue3-ScoreEntry-Windows.zip`, run the EXE, and enter the server address and access code provided by the host.
+3. On a participant's Windows 10/11 64-bit computer, extract [Blue3-ScoreEntry-Windows.zip](releases/Blue3-ScoreEntry-Windows.zip), run the EXE, and enter the server address and access code provided by the host.
 
 For a local network, use the host's LAN address, such as `http://192.168.1.100:8766`. Access from another network requires a VPN or an HTTPS tunnel to the score-entry service. Keep the host computer and any required tunnel running while others are recording scores.
 
 When updating the client, finish or confirm any pending submission, click **退出客户端** (Exit Client) in the old page, and then open the new EXE. The page displays **客户端 1.3.0** (Client 1.3.0) so you can confirm which version is running.
 
-
+---
 
 # Blue3-Scoreboard
 

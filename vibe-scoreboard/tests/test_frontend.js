@@ -131,6 +131,104 @@ function graphMatch(id,ids,scores) {
   await run("saveMatch({preventDefault(){}})");
   assert.deepEqual(plain(context.requests.at(-1).body.rank_order),[1,3,2]);
 
+  // Switching entry modes preserves both drafts and shares only match metadata.
+  assert(elements.has("multi-scoring-mode"),"多人录分应提供切回记一局的计分方式选择框");
+  const chooseMatchMode=(mode)=>{
+    const event={target:elements.get("scoring-mode")}; event.target.value=mode;
+    elements.get("match-form").listeners.input[0](event);
+    elements.get("match-form").listeners.change[0](event);
+  };
+  const chooseMultiMode=(mode)=>{
+    const event={target:elements.get("multi-scoring-mode")}; event.target.value=mode;
+    elements.get("multi-form").listeners.input[0](event);
+    event.target.listeners.change[0](event);
+    elements.get("multi-form").listeners.change[0](event);
+  };
+  setData();
+  run("openMatch(null,2)");
+  fillMatch([500,400,150],[2,-1,-1]);
+  elements.get("battle-count-0").value="444";
+  elements.get("extra-0").value="2.5";
+  elements.get("match-date").value="2026-11-12T19:30";
+  elements.get("match-note").value="切换前的备注";
+  elements.get("match-rate").value="1.25";
+  const requestsBeforeSwitch=context.requests.length;
+  chooseMatchMode("multi");
+  assert.equal(elements.get("multi-dialog").open,true);
+  assert.equal(elements.get("match-dialog").open,false);
+  assert.equal(elements.get("multi-scoring-mode").value,"multi");
+  assert.equal(elements.get("multi-competition").value,"2");
+  assert.equal(elements.get("multi-date").value,"2026-11-12T19:30");
+  assert.equal(elements.get("multi-note").value,"切换前的备注");
+  assert.equal(elements.get("multi-rate").value,"1.25");
+  [10,-5,8.5,-13.5].forEach((value,i)=>{elements.get("multi-base-"+i).value=String(value);});
+  elements.get("multi-count-0").value="8";
+  elements.get("multi-player-3").value="6";
+  elements.get("multi-note").value="多人窗口更新的备注";
+  elements.get("multi-date").value="2026-11-13T20:00";
+  elements.get("multi-competition").value="1";
+  elements.get("multi-rate").value="2";
+  elements.get("multi-paste").value="保留尚未读入的粘贴内容";
+  chooseMultiMode("points");
+  assert.equal(elements.get("match-dialog").open,true);
+  assert.equal(elements.get("multi-dialog").open,false);
+  assert.equal(elements.get("scoring-mode").value,"points");
+  assert.equal(elements.get("match-competition").value,"1");
+  assert.equal(elements.get("match-date").value,"2026-11-13T20:00");
+  assert.equal(elements.get("match-note").value,"多人窗口更新的备注");
+  assert.equal(elements.get("match-rate").value,"2");
+  assert.deepEqual([0,1,2].map((i)=>elements.get("points-"+i).value),["500","400","150"]);
+  assert.deepEqual([0,1,2].map((i)=>elements.get("chip-"+i).value),["2","-1","-1"]);
+  assert.equal(elements.get("battle-count-0").value,"444");
+  assert.equal(elements.get("extra-0").value,"2.5");
+  assert.equal(elements.get("save-match").disabled,false);
+  for(let i=0;i<3;i++) {
+    chooseMatchMode("multi");
+    assert.deepEqual([0,1,2,3].map((j)=>elements.get("multi-base-"+j).value),["10","-5","8.5","-13.5"]);
+    assert.equal(elements.get("multi-player-3").value,"6");
+    assert.equal(elements.get("multi-count-0").value,"8");
+    assert.equal(elements.get("multi-paste").value,"保留尚未读入的粘贴内容");
+    assert.equal(elements.get("save-multi").disabled,false);
+    chooseMultiMode("manual");
+    assert.equal(elements.get("scoring-mode").value,"manual");
+    [20,-5,-15].forEach((value,j)=>{elements.get("base-"+j).value=String(value);});
+  }
+  assert.equal(context.requests.length,requestsBeforeSwitch);
+  chooseMatchMode("multi");
+  chooseMultiMode("manual");
+  assert.deepEqual([0,1,2].map((i)=>elements.get("base-"+i).value),["20","-5","-15"]);
+  assert.equal(elements.get("save-match").disabled,false);
+  await run("saveMatch({preventDefault(){}})");
+  assert.equal(context.requests.at(-1).body.scoring_mode,"manual");
+  assert.equal(context.requests.at(-1).body.note,"多人窗口更新的备注");
+  assert.equal(context.requests.at(-1).body.entries[0].battle_count,"444");
+
+  // A fresh multiplayer entry must not revive a previous, saved three-player draft.
+  run("openMultiMatch(null,2)");
+  elements.get("multi-note").value="直接新建多人对局";
+  elements.get("multi-base-0").value="12";
+  run("multiReading=true; validateMulti()");
+  assert.equal(elements.get("multi-scoring-mode").disabled,true);
+  chooseMultiMode("points");
+  assert.equal(elements.get("multi-dialog").open,true);
+  assert.equal(elements.get("multi-scoring-mode").value,"multi");
+  run("multiReading=false; validateMulti()");
+  chooseMultiMode("points");
+  assert.equal(elements.get("match-dialog").open,true);
+  assert.equal(elements.get("points-0").value,"");
+  assert.equal(elements.get("battle-count-0").value,"1");
+  assert.equal(elements.get("match-note").value,"直接新建多人对局");
+  chooseMatchMode("multi");
+  assert.equal(elements.get("multi-base-0").value,"12");
+  elements.get("multi-dialog").close();
+  run("data.players=data.players.slice(0,2); openMultiMatch()");
+  chooseMultiMode("points");
+  assert.equal(elements.get("multi-dialog").open,true);
+  assert.equal(elements.get("match-dialog").open,false);
+  assert.equal(elements.get("multi-scoring-mode").value,"multi");
+  assert(elements.get("multi-error").textContent.includes("至少三位选手"));
+  elements.get("multi-dialog").close();
+
   setData();
   run("openMatch(null,2)");
   elements.get("scoring-mode").value="multi";
@@ -198,6 +296,11 @@ function graphMatch(id,ids,scores) {
   assert.equal(run("multiRows.length"),7);
   assert.equal(elements.get("multi-base-0").value,"35.55");
   assert.equal(elements.get("multi-rate").value,"1.25");
+  assert.equal(elements.get("multi-scoring-mode").disabled,true);
+  chooseMultiMode("points");
+  assert.equal(elements.get("multi-dialog").open,true);
+  assert.equal(elements.get("match-dialog").open,false);
+  assert.equal(elements.get("multi-scoring-mode").value,"multi");
   elements.get("multi-rate").value="2";
   await run("saveMultiMatch({preventDefault(){}})");
   assert.equal(context.requests.at(-1).url,"/api/matches/1");
@@ -210,6 +313,10 @@ function graphMatch(id,ids,scores) {
   elements.get("multi-kind").listeners.change[0]();
   assert.equal(elements.get("multi-base-0").value,"0");
   elements.get("multi-count-0").value="63";
+  chooseMultiMode("points");
+  chooseMatchMode("multi");
+  assert.equal(elements.get("multi-kind").value,"counts");
+  assert.equal(elements.get("multi-count-0").value,"63");
   assert.equal(run("validateMulti()"),true);
   await run("saveMultiMatch({preventDefault(){}})");
   assert.equal(context.requests.at(-1).body.record_kind,"counts");
@@ -227,6 +334,11 @@ function graphMatch(id,ids,scores) {
   assert.equal(elements.get("multi-total-4").textContent,"-10");
   assert.equal(elements.get("save-multi").disabled,false);
   assert.equal(JSON.stringify(context.fixture),unchanged); // Reading a table does not write a round or create players.
+  chooseMultiMode("points");
+  chooseMatchMode("multi");
+  assert.equal(run("multiRows.length"),5);
+  assert.equal(elements.get("multi-player-4").value,"new-4");
+  assert.equal(elements.get("multi-base-4").value,"-10");
   context.multiReadError="多人对局的基础分合计必须为 0, 当前为 0.01.";
   elements.get("multi-paste").value="选手 A\t0.1\n选手 B\t0.2\n选手 C\t-0.29";
   await run("readMultiScores(true)");

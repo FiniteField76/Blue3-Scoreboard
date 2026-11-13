@@ -1,4 +1,5 @@
 """Point scoring, migration, bulk deletion and HTTP regression checks."""
+from contextlib import closing
 
 import csv
 import io
@@ -197,7 +198,7 @@ class PointTests(unittest.TestCase):
 
     def test_original_database_migrates_without_changing_scores(self):
         path = Path(self.temp.name) / "original.sqlite3"
-        with sqlite3.connect(path) as db:
+        with closing(sqlite3.connect(path)) as db:
             db.executescript("""
                 CREATE TABLE players(id INTEGER PRIMARY KEY, name TEXT UNIQUE, active INTEGER);
                 CREATE TABLE matches(id INTEGER PRIMARY KEY, played_at TEXT, note TEXT, revision INTEGER,

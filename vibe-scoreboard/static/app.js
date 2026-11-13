@@ -14,6 +14,7 @@ let draftChartIds = new Set();
 let selectedCompetitionIds = null, draftCompetitionIds = new Set(), editingCompetition = null;
 let moveSelection = [], importUpload = null, importPreview = null, importBusy = false, competitionBusy = false, moveBusy = false;
 let multiRows = [], multiEditing = null, multiRequestKey = "", multiSaving = false, multiReading = false;
+let scoreEntryDrafts = { matchMode: null, multiReady: false };
 const PAGE_SIZE = 12;
 const SCORE_SCALE = 10000;
 
@@ -648,12 +649,13 @@ async function exportChartImage() {
 }
 
 function newKey() { return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`; }
-function openMatch(id = null, competitionId = null) {
+function openMatch(id = null, competitionId = null, preserveDrafts = false) {
   const match = id ? data.matches.find((m) => m.id === Number(id)) : null;
   if (id && !match) { toast("比赛已不存在, 请刷新后重试.", true); return; }
   if (match?.scoring_mode === "multi") { openMultiMatch(id, competitionId); return; }
   if (!(data.competitions || []).length) { toast("请先建立一场比赛.", true); switchView("competitions"); openCompetition(); return; }
   if (!match && data.players.filter((p) => p.active).length < 3) { toast("请先添加或恢复至少三位选手.", true); switchView("players"); return; }
+  if (!preserveDrafts) scoreEntryDrafts = { matchMode: null, multiReady: false };
   editingMatch = match; requestKey = newKey(); knockoutAwards = { ...(match?.knockouts || {}) }; knockoutSavePending = false;
   $("match-dialog-title").textContent = match ? `编辑对局 #${String(match.id).padStart(3,'0')}` : "记一局";
   const chosenCompetition = match?.competition_id || competitionId || (selectedCompetitionIds?.size === 1 ? [...selectedCompetitionIds][0] : data.competitions[0].id);
@@ -697,6 +699,8 @@ function readMatchForm() {
   return payload;
 }
 function syncScoringFields() {
+  if (["points","manual"].includes($("scoring-mode").value)) scoreEntryDrafts.matchMode = $("scoring-mode").value;
+  $("scoring-mode").disabled = saving;
   const pointsMode = $("scoring-mode").value === "points";
   document.querySelectorAll(".point-field").forEach((el) => el.classList.toggle("hidden",!pointsMode));
   document.querySelectorAll(".manual-field").forEach((el) => el.classList.toggle("hidden",pointsMode));
@@ -784,6 +788,7 @@ async function saveMatch(event) {
   if (payload.scoring_mode === "points") payload.rank_order = result.order;
   const wasEditing = Boolean(editingMatch), url = editingMatch ? `/api/matches/${editingMatch.id}` : "/api/matches";
   saving = true; $("save-match").disabled = true; $("save-match").innerHTML = "正在保存...";
+  $("scoring-mode").disabled = true;
   showError("match-error");
   try {
     await api(url, { method: wasEditing ? "PUT" : "POST", body: JSON.stringify(payload) });
@@ -794,10 +799,11 @@ async function saveMatch(event) {
   finally { saving = false; $("save-match").innerHTML = icon("check") + "保存对局"; validateMatch(); }
 }
 
-function openMultiMatch(id = null, competitionId = null) {
+function openMultiMatch(id = null, competitionId = null, preserveDrafts = false) {
   const match = id ? data.matches.find((m) => m.id === Number(id)) : null;
   if (id && !match) { toast("对局已不存在, 请刷新后重试.", true); return; }
   if (!(data.competitions || []).length) { toast("请先建立一场比赛.", true); switchView("competitions"); openCompetition(); return; }
+  if (!preserveDrafts) scoreEntryDrafts = { matchMode: null, multiReady: false };
   multiEditing = match; multiRequestKey = newKey(); multiSaving = false; multiReading = false;
   const cid = match?.competition_id || competitionId || (selectedCompetitionIds?.size === 1 ? [...selectedCompetitionIds][0] : data.competitions[0].id);
   $("multi-title").textContent = match ? `编辑多人对局 #${String(match.id).padStart(3,'0')}` : "多人录分";
@@ -805,10 +811,41 @@ function openMultiMatch(id = null, competitionId = null) {
   $("multi-date").value = match?.played_at || localDateTime(); $("multi-note").value = match?.note || "";
   $("multi-rate").value = match?.rate || data.settings.rate;
   $("multi-kind").value = match?.record_kind || "score";
+  $("multi-scoring-mode").value = "multi";
   $("multi-file").value = ""; $("multi-paste").value = "";
   multiRows = match ? match.entries.map((e) => ({player_id:e.player_id, player_name:e.name, base:plainScore(e.base_cents), battle_count:e.battle_count ?? 1}))
     : data.players.filter((p) => p.active).slice(0,4).map((p) => ({player_id:p.id, player_name:p.name, base:"", battle_count:1}));
+  scoreEntryDrafts.multiReady = true;
   showError("multi-error"); renderMultiRows(); $("multi-dialog").showModal();
+}
+function switchScoreEntry(mode) {
+  if (!["points","manual","multi"].includes(mode)) return;
+  const fromMulti = $("multi-dialog").open;
+  $("multi-scoring-mode").value = "multi";
+  if (mode === "multi") $("scoring-mode").value = scoreEntryDrafts.matchMode || "points";
+  if ((mode === "multi") === fromMulti) return;
+  if (fromMulti ? multiEditing || multiSaving || multiReading : editingMatch || saving || !$("match-dialog").open) return;
+  if (fromMulti && data.players.filter((p) => p.active).length < 3) {
+    showError("multi-error","记一局需要至少三位选手, 请先添加或恢复选手.");
+    return;
+  }
+  const source = fromMulti ? "multi" : "match", target = fromMulti ? "match" : "multi";
+  const shared = Object.fromEntries(["competition","date","note","rate"].map((field) => [field,$(source+"-"+field).value]));
+  if (fromMulti) multiRows = readMultiRows();
+  $(source+"-dialog").close();
+  if (mode === "multi") {
+    if (scoreEntryDrafts.multiReady) $("multi-dialog").showModal();
+    else openMultiMatch(null,Number(shared.competition),true);
+    multiRequestKey = newKey();
+  } else {
+    if (scoreEntryDrafts.matchMode) $("match-dialog").showModal();
+    else openMatch(null,Number(shared.competition),true);
+    $("scoring-mode").value = mode;
+    requestKey = newKey();
+  }
+  for (const [field,value] of Object.entries(shared)) $(target+"-"+field).value = value;
+  showError(target+"-error");
+  if (mode === "multi") validateMulti(); else validateMatch();
 }
 function readMultiRows() {
   return multiRows.map((row,i) => {
@@ -860,6 +897,8 @@ function validateMulti() {
       : `${payload.entries.length} 位选手, rate = ${payload.rate}, 总分合计 ${score(result.totals.reduce((a,b) => a+b,0))}.`;
   $("save-multi").disabled = multiSaving || multiReading || Boolean(result.error) || !dateValid || !competitionValid;
   for (const id of ["multi-add","multi-add-all","multi-read-file","multi-read-paste","multi-rate","multi-kind","multi-date","multi-note","multi-competition","multi-file","multi-paste"]) $(id).disabled = multiSaving || multiReading;
+  $("multi-scoring-mode").disabled = Boolean(multiEditing) || multiSaving || multiReading;
+  $("multi-scoring-mode").title = multiEditing ? "编辑已有对局时保留原录分类型" : "切换时保留两种录分方式的草稿";
   return !result.error && dateValid && competitionValid;
 }
 async function readMultiScores(pasted = false) {
@@ -1213,15 +1252,17 @@ $("download-template").onclick = async () => {
   catch (error) { showError("import-error",error.message || "模板下载失败."); }
 };
 $("match-form").addEventListener("submit", saveMatch);
-$("match-form").addEventListener("input", () => { showError("match-error"); requestKey = newKey(); validateMatch(); });
+$("match-form").addEventListener("input", () => { showError("match-error"); requestKey = newKey(); if ($("scoring-mode").value !== "multi") validateMatch(); });
 $("match-form").addEventListener("change", () => {
-  if ($("scoring-mode").value === "multi") {
-    const cid = Number($("match-competition").value), rate = $("match-rate").value;
-    $("match-dialog").close(); openMultiMatch(null,cid); $("multi-rate").value = rate; validateMulti();
-  } else validateMatch();
+  if ($("scoring-mode").value === "multi") switchScoreEntry("multi");
+  else validateMatch();
 });
 $("multi-form").addEventListener("submit",saveMultiMatch);
-for (const name of ["input","change"]) $("multi-form").addEventListener(name, () => { showError("multi-error"); multiRequestKey = newKey(); validateMulti(); });
+$("multi-scoring-mode").addEventListener("change", () => switchScoreEntry($("multi-scoring-mode").value));
+for (const name of ["input","change"]) $("multi-form").addEventListener(name, (event) => {
+  if (event.target.id === "multi-scoring-mode") return;
+  showError("multi-error"); multiRequestKey = newKey(); validateMulti();
+});
 $("multi-kind").addEventListener("change", () => {
   if ($("multi-kind").value === "counts") for (let i=0;i<multiRows.length;i++) if (!$(`multi-base-${i}`).value.trim()) $(`multi-base-${i}`).value = "0";
   validateMulti();

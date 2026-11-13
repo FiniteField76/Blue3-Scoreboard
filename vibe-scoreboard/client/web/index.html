@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Blue3 · 共享录分 1.3.0</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/app.css">
+  <script src="/form.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead"><div class="brand"><img src="/favicon.svg" alt="" width="44" height="44"><div><span class="eyebrow">BLUE3 SCOREBOARD</span><h1>共享录分</h1><span class="subtle" id="client-version">客户端 1.3.0</span></div></div><button id="quit" class="text-button" type="button">退出客户端</button></header>
+    <p class="intro">选择赛季, 填写本场成绩, 提交到大家共用的计分板.</p>
+    <section class="card connection-card" aria-labelledby="connection-title">
+      <div class="section-heading"><h2 id="connection-title">连接服务器</h2><span id="connection-badge" class="badge">未连接</span></div>
+      <form id="connection-form">
+        <div class="connection-grid">
+          <label>服务器地址<input id="server-url" type="text" autocomplete="url" placeholder="http://192.168.1.100:8766" required></label>
+          <label>录分码<input id="access-code" type="password" autocomplete="off" placeholder="由服务器管理员提供"></label>
+          <button id="connect" class="button secondary" type="submit">连接</button>
+        </div>
+      </form>
+      <p id="connection-status" class="helper" role="status">首次使用时, 填入服务器地址和录分码. 地址会自动记住.</p>
+    </section>
+    <section class="card entry-card" aria-labelledby="entry-title">
+      <div class="section-heading"><div><span class="eyebrow">NEW MATCH</span><h2 id="entry-title">录入本场成绩</h2></div><span id="roster-count" class="subtle">等待连接</span></div>
+      <form id="entry-form" novalidate>
+        <fieldset id="entry-fields" disabled>
+          <div class="metadata">
+            <label class="season-field">所属赛季<select id="season" required><option value="">请先连接服务器</option></select></label>
+            <label>对局时间<input id="played-at" type="datetime-local" required></label>
+          </div>
+          <p id="season-note" class="helper season-note"></p>
+          <div class="table-heading"><h3>选手成绩</h3><button id="add-player" class="text-button" type="button">+ 增加录分行</button></div>
+          <div class="table-scroll"><table><thead><tr><th class="seat">#</th><th>选手</th><th>半庄数</th><th>分数</th><th class="total-heading">计入得分</th><th class="remove-heading"><span class="sr-only">移除</span></th></tr></thead><tbody id="players"></tbody></table></div>
+          <p class="helper">请一起填写本场所有人的成绩, 分数合计须为 0. 分数是本条记录的合计, 不会再乘以半庄数.</p>
+          <label class="note-field">备注 <span class="subtle">选填</span><input id="note" type="text" maxlength="200" placeholder="例如: 周五晚场"></label>
+        </fieldset>
+        <div id="balance" class="balance"><div><span class="eyebrow">SCORE BALANCE</span><strong id="balance-title">等待填写成绩</strong><p id="balance-detail">连接服务器后开始录分.</p></div><span id="balance-value">—</span></div>
+        <p id="entry-error" class="message error hidden" role="alert"></p>
+        <div id="receipt" class="message success hidden" role="status"></div>
+        <div class="form-footer"><span id="submission-note">提交成功后, 成绩会直接计入所选赛季.</span><div><button id="new-round" class="button secondary hidden" type="button">新建下一场</button><button id="submit" class="button primary" type="submit" disabled>提交本场成绩</button></div></div>
+      </form>
+    </section>
+    <footer class="page-footer">Blue3 Scoreboard · 共享数据库, 同步每一场成绩. <a href="/third-party.txt" target="_blank" rel="noopener">第三方许可</a></footer>
+  </main>
+</body>
+</html>

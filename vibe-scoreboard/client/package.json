@@ -1,0 +1,10 @@
+{
+  "name": "blue3-score-entry-ui-tests",
+  "private": true,
+  "scripts": {
+    "test": "node test_frontend.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "31.0.0"
+  }
+}
