@@ -1,4 +1,4 @@
-Update on Nov 14, 2026
+## Update on Nov 14, 2026
 
 Shared score entry is now available through a Windows client and a server running on the host computer. The latest Windows client is **v1.3.0**.
 
