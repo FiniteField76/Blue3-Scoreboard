@@ -32,4 +32,4 @@ Bug reports and feature suggestions are welcome through GitHub Issues. Please in
 
 ## AI-Assisted Development
 
-Most of the code and Chinese documentation was generated with GPT-6.1 Sol, guided by prompts and iterative feedback. Further features and improvements are planned.
+Most of the code and Chinese documentation was generated with GPT-6.1 Sol and GPT 6 Astra, guided by prompts and iterative feedback. Further features and improvements are planned.
